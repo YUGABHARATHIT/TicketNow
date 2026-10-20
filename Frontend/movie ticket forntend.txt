@@ -1,0 +1,36 @@
+src/
+│
+├── components/
+│   ├── Navbar.jsx
+│   ├── Footer.jsx
+│   ├── MovieCard.jsx
+│   └── Seat.jsx
+│
+├── pages/
+│   ├── Home.jsx
+│   ├── Login.jsx
+│   ├── Register.jsx
+│   ├── Movies.jsx
+│   ├── MovieDetails.jsx
+│   ├── Theatre.jsx
+│   ├── ShowTime.jsx
+│   ├── SeatSelection.jsx
+│   ├── BookingSummary.jsx
+│   ├── Payment.jsx
+│   ├── BookingSuccess.jsx
+│   ├── MyBookings.jsx
+│   └── Profile.jsx
+│
+├── admin/
+│   ├── Dashboard.jsx
+│   ├── Movies.jsx
+│   ├── Theatres.jsx
+│   ├── Shows.jsx
+│   └── Bookings.jsx
+│
+├── services/
+│   └── api.js
+│
+├── App.jsx
+├── main.jsx
+└── index.css
