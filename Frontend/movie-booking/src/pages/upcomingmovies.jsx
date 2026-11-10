@@ -13,10 +13,29 @@ function UpcomingMovies() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:3001/upcomingMovies")
-      .then((response) => response.json())
-      .then((data) => setMovies(data))
-      .catch((error) => console.log(error))
+    const API_BASE_URL = (
+      import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api"
+    ).replace(/\/$/, "");
+  
+    fetch(`${API_BASE_URL}/movies/`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch movies");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const movieList = Array.isArray(data) ? data : data.results || [];
+  
+        const upcoming = movieList.filter(
+          (movie) =>
+            movie.release_date &&
+            new Date(movie.release_date) > new Date()
+        );
+  
+        setMovies(upcoming);
+      })
+      .catch((error) => console.error("Upcoming movies error:", error))
       .finally(() => setLoading(false));
   }, []);
 
@@ -53,7 +72,9 @@ function UpcomingMovies() {
                 <img
                   src={
                     movie.poster
-                      ? movie.poster
+                      ? movie.poster.startsWith("http")
+                        ? movie.poster
+                        : `${(import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api").replace(/\/api\/?$/, "")}${movie.poster.startsWith("/") ? movie.poster : `/${movie.poster}`}`
                       : "https://placehold.co/400x600/1f2937/ffffff?text=No+Poster"
                   }
                   alt={movie.title}
@@ -69,7 +90,7 @@ function UpcomingMovies() {
 
                 <p className="mb-2 flex items-center gap-2 text-sm text-gray-400">
                   <CalendarDays size={16} className="shrink-0 text-red-400" />
-                  <span>{movie.releaseDate || "Release date TBA"}</span>
+                  <span>{movie.release_date || "Release date TBA"}</span>
                 </p>
 
                 <p className="mb-2 flex items-center gap-2 text-sm text-gray-400">

@@ -10,7 +10,9 @@ import {
   Search,
 } from "lucide-react";
 
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api"
+).replace(/\/$/, "");
 
 function getArray(data) {
   // Supports both normal arrays and Django REST Framework pagination
@@ -124,15 +126,15 @@ function Theatre() {
           <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
             {movie.poster && (
               <img
-                src={
-                  movie.poster.startsWith("http")
-                    ? movie.poster
-                    : `http://127.0.0.1:8000${
-                        movie.poster.startsWith("/")
-                          ? movie.poster
-                          : `/${movie.poster}`
-                      }`
-                }
+              src={
+                movie.poster.startsWith("http")
+                  ? movie.poster
+                  : `${API_BASE_URL.replace(/\/api$/, "")}${
+                      movie.poster.startsWith("/")
+                        ? movie.poster
+                        : `/${movie.poster}`
+                    }`
+              }
                 alt={movie.title}
                 className="h-64 w-44 rounded-xl object-cover"
               />

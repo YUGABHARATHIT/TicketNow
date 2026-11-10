@@ -26,7 +26,9 @@ function BookingSummary() {
   useEffect(() => {
     if (!movieId) return;
 
-    fetch(`http://localhost:3001/upcomingMovies/${movieId}`)
+    fetch(
+      `${(import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api").replace(/\/$/, "")}/movies/${movieId}/`
+    )
       .then((res) => {
         if (!res.ok) {
           throw new Error("Movie not found");
@@ -35,7 +37,7 @@ function BookingSummary() {
       })
       .then((data) => setMovie(data))
       .catch((error) => console.error("Movie fetch error:", error));
-  }, [movieId]);
+    }, [movieId]);
 
   const movieTitle =
     booking.movieTitle || movie?.title || movie?.name || "Movie not found";
