@@ -1,29 +1,40 @@
 
 {
-    "$schema": "https://openapi.vercel.sh/vercel.json",
-    "services": {
-      "movie-booking": {
-        "root": "Frontend/movie-booking",
-        "framework": "vite"
-      },
-      "backend": {
-        "root": "Backend",
-        "framework": "django"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "movie-booking": {
+      "root": "Frontend/movie-booking",
+      "framework": "vite"
+    },
+    "backend": {
+      "root": "Backend",
+      "framework": "django"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": {
+        "service": "backend"
       }
     },
-    "rewrites": [
-      {
-        "source": "/api/(.*)",
-        "destination": {
-          "service": "backend"
-        }
-      },
-      {
-        "source": "/(.*)",
-        "destination": {
-          "service": "movie-booking"
-        }
+    {
+      "source": "/admin/(.*)",
+      "destination": {
+        "service": "backend"
       }
-    ]
-  }
-  
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "movie-booking"
+      }
+    }
+  ]
+}
