@@ -101,7 +101,9 @@ if DATABASE_URL:
         }
     }
 else:
-    # Local development fallback; production must receive DATABASE_URL from Neon.
+    if os.getenv("VERCEL"):
+        raise RuntimeError("DATABASE_URL is required in Vercel production/preview; configure the Neon PostgreSQL connection string.")
+    # Local development fallback only.
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
