@@ -80,6 +80,34 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = 'config.wsgi.application'
+
+
+# Database
+# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("DB_NAME", "ticketnow_db"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv(
+            "DB_HOST",
+            "gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
+        ),
+        "PORT": os.getenv("DB_PORT", "4000"),
+        "OPTIONS": {
+            "ssl": {
+                "ca": os.path.join(BASE_DIR, "isrgrootx1.pem"),
+            },
+            "charset": "utf8mb4",
+        },
+        "CONN_MAX_AGE": 60,
+    }
+}
+
 WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASE_URL = os.getenv("DATABASE_URL")
