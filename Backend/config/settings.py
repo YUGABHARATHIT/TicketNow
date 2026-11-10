@@ -110,38 +110,28 @@ DATABASES = {
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL:
-    parsed = urlparse(DATABASE_URL)
-    if parsed.scheme not in ("postgres", "postgresql"):
-        raise RuntimeError("DATABASE_URL must be a PostgreSQL connection URL")
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": unquote(parsed.path.lstrip("/")),
-            "USER": unquote(parsed.username or ""),
-            "PASSWORD": unquote(parsed.password or ""),
-            "HOST": parsed.hostname,
-            "PORT": parsed.port or 5432,
-            "CONN_MAX_AGE": 0,
-            "CONN_HEALTH_CHECKS": True,
-            "OPTIONS": {"sslmode": "require"},
-        }
+
+# Database
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("DB_NAME", "ticketnow_db"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv(
+            "DB_HOST",
+            "gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
+        ),
+        "PORT": os.getenv("DB_PORT", "4000"),
+        "OPTIONS": {
+            "ssl": {
+                "ca": os.path.join(BASE_DIR, "isrgrootx1.pem"),
+            },
+            "charset": "utf8mb4",
+        },
+        "CONN_MAX_AGE": 60,
     }
-else:
-    if os.getenv("VERCEL"):
-        raise RuntimeError("DATABASE_URL is required in Vercel production/preview; configure the Neon PostgreSQL connection string.")
-    # Local development fallback only.
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": os.getenv("DB_NAME"),
-            "USER": os.getenv("DB_USER"),
-            "PASSWORD": os.getenv("DB_PASSWORD"),
-            "HOST": os.getenv("DB_HOST", "127.0.0.1"),
-            "PORT": os.getenv("DB_PORT", "3306"),
-        }
-    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
