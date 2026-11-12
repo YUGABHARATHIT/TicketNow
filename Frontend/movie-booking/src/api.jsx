@@ -31,3 +31,37 @@ export async function getShows() {
 
   return response.json();
 }
+export async function getCurrentUser(token) {
+  const response = await fetch(`${API_BASE_URL}/profile/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Profile fetch failed");
+  }
+
+  return response.json();
+}
+
+export async function updateProfile(token, data) {
+  const response = await fetch(`${API_BASE_URL}/profile/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.detail || "Profile update failed"
+    );
+  }
+
+  return result;
+}

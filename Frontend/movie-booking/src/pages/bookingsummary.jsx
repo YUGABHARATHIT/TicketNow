@@ -16,9 +16,11 @@ import { useEffect, useState } from "react";
 function BookingSummary() {
   const navigate = useNavigate();
   const location = useLocation();
+  console.log("SeatSelection state:", location.state);
   const { id } = useParams();
 
   const booking = location.state || {};
+  const showId = booking.showId;
   const movieId = booking.movieId || id;
 
   const [movie, setMovie] = useState(null);
@@ -109,6 +111,9 @@ function BookingSummary() {
               <p className="mt-1 text-sm text-gray-400">
                 Movie ID: {movieId || "Not available"}
               </p>
+              <p className="mt-1 text-sm text-green-400">
+  Show ID: {showId || "Not available"}
+</p>
             </div>
           </div>
 

@@ -249,12 +249,11 @@ function Theatre() {
                       return;
                     }
 
-                    navigate(`/seats/${id}`, {
+                    navigate(`/showtime/${id}`, {
                       state: {
                         movieId: id,
-                        theatre: theatre.name,
                         theatreId: theatre.id,
-                        showtime: selectedTime[theatre.id] || "",
+                        theatre: theatre.name,
                       },
                     });
                   }}

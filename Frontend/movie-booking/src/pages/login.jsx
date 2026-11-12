@@ -1,4 +1,4 @@
-
+import { GoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import {
   Ticket,
@@ -53,11 +53,18 @@ function Login() {
       // Keep tokens when the user logs in successfully.
       const storage = rememberMe ? localStorage : sessionStorage;
 
+      storage.setItem("access", data.access);
+      storage.setItem("refresh", data.refresh);
+
       storage.setItem("accessToken", data.access);
       storage.setItem("refreshToken", data.refresh);
 
+      window.dispatchEvent(new Event("auth-changed"));
+
       // Remove any previous tokens from the other storage.
       const otherStorage = rememberMe ? sessionStorage : localStorage;
+      otherStorage.removeItem("access");
+      otherStorage.removeItem("refresh");
       otherStorage.removeItem("accessToken");
       otherStorage.removeItem("refreshToken");
 
@@ -79,7 +86,67 @@ function Login() {
       setLoading(false);
     }
   };
-
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError("");
+    setLoading(true);
+  
+    try {
+      const response = await fetch(
+        `${(import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api").replace(/\/$/, "")}/google-login/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            credential: credentialResponse.credential,
+          }),
+        }
+      );
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.error || "Google login failed");
+      }
+  
+      const storage = rememberMe ? localStorage : sessionStorage;
+  
+      storage.setItem("access", data.access);
+      storage.setItem("refresh", data.refresh);
+      storage.setItem("accessToken", data.access);
+      storage.setItem("refreshToken", data.refresh);
+      if (data.user?.picture) {
+        storage.setItem("googleProfileImage", data.user.picture);
+      } else {
+        storage.removeItem("googleProfileImage");
+      }
+      
+      window.dispatchEvent(new Event("auth-changed"));
+  
+      const otherStorage = rememberMe ? sessionStorage : localStorage;
+  
+      otherStorage.removeItem("access");
+      otherStorage.removeItem("refresh");
+      otherStorage.removeItem("accessToken");
+      otherStorage.removeItem("refreshToken");
+  
+      const bookingData = location.state;
+  
+      if (bookingData?.movieId) {
+        navigate(`/booking-summary/${bookingData.movieId}`, {
+          state: bookingData,
+          replace: true,
+        });
+      } else {
+        navigate("/", { replace: true });
+      }
+    } catch (err) {
+      setError(err.message || "Google login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-[#080d1d] text-white">
       <div className="flex min-h-[calc(100vh-86px)] items-center justify-center bg-linear-to-br from-[#030817] via-[#101a35] to-[#111d42] px-5 py-12">
@@ -149,18 +216,18 @@ function Login() {
               {/* Username */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-200">
-                  Username
+                Email Address
                 </label>
 
                 <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#080e1e] px-4 transition focus-within:border-red-500">
                   <Mail size={19} className="text-gray-500" />
 
                   <input
-                    type="text"
-                    placeholder="Enter your username"
+                   type="email"
+                   placeholder="Enter your email"
+                   autoComplete="email"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    autoComplete="username"
                     required
                     className="w-full bg-transparent py-3.5 text-white outline-none placeholder:text-gray-600"
                   />
@@ -240,6 +307,23 @@ function Login() {
                 {loading ? "Logging in..." : "Login"}
               </button>
             </form>
+            <div className="my-6 flex items-center gap-3">
+  <div className="h-px flex-1 bg-white/10" />
+  <span className="text-sm text-gray-500">OR</span>
+  <div className="h-px flex-1 bg-white/10" />
+</div>
+
+<div className="flex justify-center">
+  <GoogleLogin
+    onSuccess={handleGoogleSuccess}
+    onError={() => setError("Google login failed")}
+    theme="outline"
+    size="large"
+    text="continue_with"
+    shape="rectangular"
+    width="300"
+  />
+</div>
 
             <p className="mt-8 text-center text-sm text-gray-400">
               Don't have an account?{" "}

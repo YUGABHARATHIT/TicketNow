@@ -1,9 +1,65 @@
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Ticket, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Ticket, User, Mail, Lock, Eye, EyeOff
+} from "lucide-react";
 
 function Register() {
   const [showPassword, setShowPassword] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const API_BASE_URL = (
+      import.meta.env.VITE_API_BASE_URL ||
+      "http://127.0.0.1:8000/api"
+    ).replace(/\/$/, "");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/register/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          first_name: fullName.trim(),
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const message = Object.values(data).flat().join(" ");
+        throw new Error(message || "Registration failed.");
+      }
+
+      // Automatic login after successful registration
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+
+      sessionStorage.setItem("access", data.access);
+      sessionStorage.setItem("refresh", data.refresh);
+
+      navigate("/", { replace: true });
+
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-[#030817] via-[#101a35] to-[#111d42] px-4 py-10 text-white">
@@ -24,13 +80,8 @@ function Register() {
           Sign up and book your favourite movies!
         </p>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            alert("Register design ready! Backend connection is next.");
-          }}
-          className="space-y-5"
-        >
+        <form onSubmit={handleRegister} className="space-y-5">
+
           <div>
             <label className="mb-2 block text-sm font-medium">
               Full Name
@@ -40,7 +91,10 @@ function Register() {
               <input
                 type="text"
                 placeholder="Enter your name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 required
+                maxLength={150}
                 className="w-full bg-transparent py-3.5 outline-none placeholder:text-gray-600"
               />
             </div>
@@ -55,6 +109,8 @@ function Register() {
               <input
                 type="email"
                 placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full bg-transparent py-3.5 outline-none placeholder:text-gray-600"
               />
@@ -70,6 +126,8 @@ function Register() {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Create a password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
                 className="w-full bg-transparent py-3.5 outline-none placeholder:text-gray-600"
@@ -85,11 +143,18 @@ function Register() {
             </div>
           </div>
 
+          {error && (
+            <p className="rounded-lg bg-red-500/10 p-3 text-sm text-red-400">
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
-            className="w-full rounded-xl bg-red-600 py-3.5 font-bold transition hover:bg-red-700"
+            disabled={loading}
+            className="w-full rounded-xl bg-red-600 py-3.5 font-bold transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
@@ -109,6 +174,7 @@ function Register() {
         >
           Back to Home
         </Link>
+
       </div>
     </div>
   );

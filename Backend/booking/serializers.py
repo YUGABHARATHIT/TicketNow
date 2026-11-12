@@ -1,6 +1,6 @@
-
+from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import Movie, Theatre, Show, Booking
+from .models import Movie, Theatre, Show, Booking, UserProfile
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -61,3 +61,55 @@ class BookingSerializer(serializers.ModelSerializer):
             "user", "booking_code", "total_amount",
             "status", "payment_status",
         )
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8
+    )
+
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "username", "email", "password"]
+        read_only_fields = ["username"]
+
+    def validate_email(self, value):
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError(
+                "This email is already registered."
+            )
+        return value
+
+    def create(self, validated_data):
+        email = validated_data["email"].strip().lower()
+
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            first_name=validated_data["first_name"].strip(),
+            password=validated_data["password"],
+        )
+        return user
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        source="user.first_name",
+        required=False
+    )
+    email = serializers.EmailField(
+        source="user.email",
+        read_only=True
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = ["name", "email", "phone"]
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", {})
+
+        if "first_name" in user_data:
+            instance.user.first_name = user_data["first_name"]
+            instance.user.save(update_fields=["first_name"])
+
+        return super().update(instance, validated_data)

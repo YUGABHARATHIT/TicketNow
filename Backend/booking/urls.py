@@ -6,6 +6,11 @@ from .views import (
     TheatreViewSet,
     ShowViewSet,
     BookingViewSet,
+    register_user,
+    current_user,
+    google_login,
+    create_payment_order,
+    verify_payment,
 )
 
 router = DefaultRouter()
@@ -18,4 +23,18 @@ router.register("bookings", BookingViewSet, basename="booking")
 urlpatterns = [
     *router.urls,
     path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("register/", register_user, name="register"),
+    path("profile/", current_user, name="current_user"),
+    path("google-login/", google_login, name="google_login"),
+    path(
+    "create-payment-order/",
+    create_payment_order,
+    name="create_payment_order",
+    
+),
+path(
+    "verify-payment/",
+    verify_payment,
+    name="verify_payment"
+),
 ]

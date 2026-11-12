@@ -88,6 +88,17 @@ class Booking(models.Model):
         max_digits=10,
         decimal_places=2,
     )
+    razorpay_order_id = models.CharField(
+    max_length=100,
+    blank=True,
+    default="",
+    )
+
+    razorpay_payment_id = models.CharField(
+    max_length=100,
+    blank=True,
+    default="",
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -118,3 +129,14 @@ class CastCrew(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.movie.title}"
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile"
+    )
+    phone = models.CharField(max_length=15, blank=True)
+
+    def __str__(self):
+        return self.user.username

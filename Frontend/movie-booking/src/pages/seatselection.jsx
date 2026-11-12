@@ -21,11 +21,18 @@ function SeatSelection() {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
-  const { theatre, showtime, movieTitle } = location.state || {};
+  const {
+    theatre,
+    showtime,
+    movieTitle,
+    showId,
+    date,
+    ticketPrice,
+  } = location.state || {};
 
   const [selectedSeats, setSelectedSeats] = useState([]);
 
-  const seatPrice = 180;
+  const seatPrice = Number(ticketPrice) || 180;
   const totalPrice = selectedSeats.length * seatPrice;
 
   const toggleSeat = (seat) => {
@@ -194,15 +201,17 @@ function SeatSelection() {
       localStorage.getItem("accessToken") ||
       sessionStorage.getItem("accessToken");
 
-    const bookingData = {
-      movieId: id,
-      movieTitle: movieTitle || "Movie",
-      theatre: theatre || "Theatre",
-      showtime: showtime || "Not selected",
-      seats: selectedSeats,
-      totalPrice: selectedSeats.length * seatPrice,
-    };
-
+      const bookingData = {
+        movieId: id,
+        showId: showId,
+        movieTitle: movieTitle || "Movie",
+        theatre: theatre || "Theatre",
+        showtime: showtime || "Not selected",
+        date,
+        ticketPrice: seatPrice,
+        seats: selectedSeats,
+        totalPrice: selectedSeats.length * seatPrice,
+      };
     if (!token) {
       navigate("/login", { state: bookingData });
       return;
