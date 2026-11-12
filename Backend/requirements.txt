@@ -6,3 +6,4 @@ python-dotenv==1.2.4
 PyMySQL
 Pillow==12.3.0
 whitenoise
+django-cloudinary-storage
